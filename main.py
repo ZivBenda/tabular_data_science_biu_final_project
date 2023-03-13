@@ -18,9 +18,6 @@ from sklearn.inspection import permutation_importance
 from matplotlib import pyplot
 from xgboost import plot_importance
 
-shap.initjs()
-np.random.seed(0)
-
 IRIS_URL = "https://raw.githubusercontent.com/ZivBenda/tabular_data_science_biu_final_project/main/datasets/IRIS.csv"
 TITANIC_URL = "https://raw.githubusercontent.com/ZivBenda/tabular_data_science_biu_final_project/main/datasets/titanic.csv"
 CANCER_URL = "https://raw.githubusercontent.com/ZivBenda/tabular_data_science_biu_final_project/main/datasets/cancer.csv"
@@ -30,6 +27,7 @@ TITANIC_DATASET = "titanic_dataset"
 CANCER_DATASET = "cancer_dataset"
 SLEEPING_DATASET = "sleeping_dataset"
 
+shap.initjs()
 SEED = 2023
 np.random.seed(SEED)
 
