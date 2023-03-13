@@ -1,3 +1,5 @@
+#imports
+
 import shap
 import pandas as pd
 import numpy as np
@@ -18,6 +20,7 @@ from sklearn.inspection import permutation_importance
 from matplotlib import pyplot
 from xgboost import plot_importance
 
+#datasets urls and names
 IRIS_URL = "https://raw.githubusercontent.com/ZivBenda/tabular_data_science_biu_final_project/main/datasets/IRIS.csv"
 TITANIC_URL = "https://raw.githubusercontent.com/ZivBenda/tabular_data_science_biu_final_project/main/datasets/titanic.csv"
 CANCER_URL = "https://raw.githubusercontent.com/ZivBenda/tabular_data_science_biu_final_project/main/datasets/cancer.csv"
@@ -28,10 +31,11 @@ CANCER_DATASET = "cancer_dataset"
 SLEEPING_DATASET = "sleeping_dataset"
 
 shap.initjs()
+#using a SEED in order to reproduce results 
 SEED = 2023
 np.random.seed(SEED)
 
-
+# this method loads the datasets into pandas objects and store them on dictionary. 
 def reload_datasets():
     return { IRIS_DATASET: pd.read_csv(IRIS_URL),
              TITANIC_DATASET: pd.read_csv(TITANIC_URL),
@@ -39,6 +43,8 @@ def reload_datasets():
              CANCER_DATASET: pd.read_csv(CANCER_URL)
             }
 
+#Preprocess the datasets
+#selecting only potential columns for classification task i.e ignoring (id, name) coulums etc.
 
 def preprocess_dataset(name, dataset):
     if name == IRIS_DATASET:
@@ -73,7 +79,9 @@ def preprocess_dataset(name, dataset):
         X = dataset[features]
     return X, Y
 
-
+# Models Definitions
+# here we creating 4 model trainig methods (KNN, SVM, Decision_Tree & Logistic Regression with shap plots.
+                                          
 def KNN(X_train, Y_train, X_test, dataset_name, class_names):
     print(f'Executing KNN on {dataset_name}')
     plt.subplot(121)
@@ -128,7 +136,8 @@ def Logistic_Regression(X_train, Y_train, X_test, dataset_name, class_names):
     y_predict = logistic_reg_model.predict(X_test)
     return y_predict
 
-
+#XGBOOST model
+# We try to compare between the results of SHAP with the above models and the result of the tree-based XGBOOST model.
 def XGBoostClassifier(X_train, Y_train, dataset_name):
     xgb = XGBClassifier()
     xgb.fit(X_train, Y_train)
@@ -138,20 +147,23 @@ def XGBoostClassifier(X_train, Y_train, dataset_name):
     plt.savefig(f'{dataset_name}_XGBOOST.png')
 
 
+# models dictionary
+# a wrapper for our classification models methods mentioned above
 models={'KNN' : lambda X_train, Y_train, X_test, dataset_name, class_names : KNN(X_train, Y_train, X_test, dataset_name, class_names),
         'SVM' : lambda X_train, Y_train, X_test, dataset_name, class_names : SVM(X_train, Y_train, X_test, dataset_name, class_names),
         'Decision_Tree' : lambda X_train, Y_train, X_test, dataset_name, class_names : Decision_Tree(X_train, Y_train, X_test, dataset_name, class_names),
         'Logistic_Regression' : lambda X_train, Y_train, X_test, dataset_name, class_names:Logistic_Regression(X_train.values, Y_train, X_test, dataset_name, class_names)
         }
 
-
+#Models training method
+# this method purpose is to train all models on specific dataset and print classification report for each of them.
 def models_train(X_train, y_train, X_test, y_test, dataset_name, target_strings):
     for model in models.values():
         y_predict = model(X_train, y_train, X_test, dataset_name, target_strings)
         print(classification_report(y_test, y_predict, target_names=target_strings))
         plt.show()
 
-
+# helper ploting function
 def plot_pie_train_test(y_train, y_test):
     plt.figure(figsize=(10, 15))
 
@@ -166,7 +178,7 @@ def plot_pie_train_test(y_train, y_test):
     plt.tight_layout()
     plt.show()
 
-
+# this method encodes text-labels into numbers
 def encode_labels(y_train, y_test, Y, name):
     le = preprocessing.LabelEncoder()
     trained_le = le.fit(y_train)
@@ -202,7 +214,7 @@ def feature_selection(X_train, X_test, name):
                      'smoothness_worst', 'symmetry_worst'])
     return X_train, X_test
 
-
+# we have only missing values on titanic dataset
 def check_missing_values(X, name):
     print(X.isnull().sum())
     if name == TITANIC_DATASET:
